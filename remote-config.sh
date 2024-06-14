@@ -1,0 +1,5 @@
+export MAC_ADDRESS="00:11:22:33:44:55"
+export TARGET_IP="192.168.1.100"
+export SSH_USER="yourusername"
+export SSH_KEY="/path/to/your/private/key"
+export APPLICATION="C:\\Program Files\\Parsec\\parsecd.exe"
