@@ -1,5 +1,9 @@
-export MAC_ADDRESS="00:11:22:33:44:55"
-export TARGET_IP="192.168.1.100"
-export SSH_USER="yourusername"
-export SSH_KEY="/path/to/your/private/key"
-export APPLICATION="C:\\Program Files\\Parsec\\parsecd.exe"
+export MAC_ADDRESS="50:EB:F6:25:2D:FD"
+export ROUTER_PUBLIC_IP="92.105.36.51"
+export TARGET_IP="192.168.1.124"
+export SSH_USER="kenta"
+export PORT="9"
+export SSH_KEY="~/.ssh/wake_on_lan"
+export APPLICATION="\"D:\\program\\Parsec\\parsecd.exe\""
+
+

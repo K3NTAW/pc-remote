@@ -1,26 +1,27 @@
 #!/bin/bash
 
-#configuration file
+# Configuration file
 source remote-config.sh
 
 ACTION=$1
 
 wake_pc() {
-    echo "Sending Wake-on-LAN packet to $MAC_ADDRESS..."
-    wakeonlan $MAC_ADDRESS
+    echo "Sending Wake-on-LAN packet to $MAC_ADDRESS at $ROUTER_PUBLIC_IP:$PORT..."
+    wakeonlan -i $ROUTER_PUBLIC_IP -p $PORT $MAC_ADDRESS
     echo "Waiting for the PC to wake up..."
-    sleep 60 
+    sleep 60
 }
 
 start_parsec() {
-    echo "Starting Parsec on $TARGET_IP..."
-    ssh -i $SSH_KEY $SSH_USER@$TARGET_IP "Start-Process -NoNewWindow -FilePath '$APPLICATION'"
+    echo "Starting Parsec on $ROUTER_PUBLIC_IP..."
+    ssh $SSH_USER@$ROUTER_PUBLIC_IP "C:\\Sysinternals\\psexec.exe -i 1 -d \"$APPLICATION\""
+
     echo "Parsec has been started."
 }
 
 shutdown_pc() {
-    echo "Shutting down the PC at $TARGET_IP..."
-    ssh -i $SSH_KEY $SSH_USER@$TARGET_IP "shutdown /s /t 0"
+    echo "Shutting down the PC at $ROUTER_PUBLIC_IP..."
+    ssh -i $SSH_KEY $SSH_USER@$ROUTER_PUBLIC_IP "shutdown /s /t 0"
     echo "PC is shutting down."
 }
 
