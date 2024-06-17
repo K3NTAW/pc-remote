@@ -22,6 +22,7 @@ show_help() {
     echo "  $0 start_parsec - h or --help"
     echo "  $0 both - h or --help"
     echo "  $0 shutdown - h or --help"
+    echo "    - Shuts down the remote PC."
     exit 1
 }
 
