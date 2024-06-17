@@ -40,8 +40,6 @@ show_command_help() {
             echo "  This command sends a Wake-on-LAN packet to the PC's MAC address to wake it up."
             echo "  It then waits for the PC to become reachable by pinging its local IP address."
             echo ""
-            echo "Options:"
-            echo "  -h, --help    : Show detailed help for the turn_on command."
             ;;
         "start_parsec")
             echo "Command: start_parsec"
@@ -52,8 +50,6 @@ show_command_help() {
             echo "  This command initiates the Parsec application on the remote PC using SSH."
             echo "  It uses psexec to start the application in the background."
             echo ""
-            echo "Options:"
-            echo "  -h, --help    : Show detailed help for the start_parsec command."
             ;;
         "both")
             echo "Command: both"
@@ -64,8 +60,6 @@ show_command_help() {
             echo "  This command combines the functionalities of turn_on and start_parsec."
             echo "  It first wakes up the PC and then starts the Parsec application on it."
             echo ""
-            echo "Options:"
-            echo "  -h, --help    : Show detailed help for the both command."
             ;;
         "shutdown")
             echo "Command: shutdown"
@@ -76,8 +70,6 @@ show_command_help() {
             echo "  This command sends a shutdown signal to the remote PC using SSH."
             echo "  It uses the shutdown command with a timeout of 0 seconds."
             echo ""
-            echo "Options:"
-            echo "  -h, --help    : Show detailed help for the shutdown command."
             ;;
         *)
             echo "Invalid command."
