@@ -74,37 +74,31 @@ HOSTNAME="remote.pc.hostname.or.ip"
 APPLICATION="C:\\Path\\To\\Parsec.exe"
 ```
 
-### Usage
-
-```sh
-./script.sh {turn_on|start_parsec|both|shutdown|restart|connect} [-h|--help]
-```
-
 #### Commands
 
 - **turn_on**: Wake up the PC and check connectivity.
   ```sh
-  ./script.sh turn_on
+  ./pc-remote-controller.sh turn_on
   ```
 - **start_parsec**: Start Parsec application on the remote machine.
   ```sh
-  ./script.sh start_parsec
+  ./pc-remote-controller.sh start_parsec
   ```
 - **both**: Perform both turn_on and start_parsec.
   ```sh
-  ./script.sh both
+  ./pc-remote-controller.sh both
   ```
 - **shutdown**: Shutdown the remote PC.
   ```sh
-  ./script.sh shutdown
+  ./pc-remote-controller.sh shutdown
   ```
 - **restart**: Restart the remote PC.
   ```sh
-  ./script.sh restart
+  ./pc-remote-controller.sh restart
   ```
 - **connect**: Connect to the remote PC via SSH.
   ```sh
-  ./script.sh connect
+  ./pc-remote-controller.sh connect
   ```
 
 #### Options
@@ -116,7 +110,7 @@ APPLICATION="C:\\Path\\To\\Parsec.exe"
 For detailed command help, use:
 
 ```sh
-./script.sh <command> -h
+./pc-remote-controller.sh <command> -h
 ```
 
 ### Example
@@ -124,7 +118,7 @@ For detailed command help, use:
 To wake up the remote PC and start Parsec:
 
 ```sh
-./script.sh both
+./pc-remote-controller.sh both
 ```
 
 ### Troubleshooting
