@@ -1,32 +1,29 @@
 #!/bin/bash
 
-# Configuration file
-source remote-config.sh
+source pc-secrets.sh
 
 ACTION=$1
 SUB_COMMAND=$2
 
-# Function to display overall script usage
 show_help() {
-    echo "Usage: $0 {turn_on|start_parsec|both|shutdown} [-h|--help]"
+    echo "Usage: $0 {turn_on|start_parsec|both|shutdown|restart|connect} [-h|--help]"
     echo "  turn_on       : Wake up the PC and check connectivity."
     echo "  start_parsec  : Start Parsec application on the remote machine."
     echo "  both          : Perform both turn_on and start_parsec."
     echo "  shutdown      : Shutdown the remote PC."
-    echo ""
-    echo "Options:"
-    echo "  -h, --help    : Show this help message and exit."
+    echo "  restart       : Restart the remote PC."
+    echo "  connect       : Connect to the remote PC via SSH."
     echo ""
     echo "For specific command help use:"
-    echo "  $0 turn_on - h or --help"
-    echo "  $0 start_parsec - h or --help"
-    echo "  $0 both - h or --help"
-    echo "  $0 shutdown - h or --help"
-    echo "    - Shuts down the remote PC."
+    echo "  $0 turn_on -h or --help"
+    echo "  $0 start_parsec -h or --help"
+    echo "  $0 both -h or --help"
+    echo "  $0 shutdown -h or --help"
+    echo "  $0 restart -h or --help"
+    echo "  $0 connect -h or --help"
     exit 1
 }
 
-# Function to display detailed command help
 show_command_help() {
     local command=$1
 
@@ -71,6 +68,26 @@ show_command_help() {
             echo "  It uses the shutdown command with a timeout of 0 seconds."
             echo ""
             ;;
+        "restart")
+            echo "Command: restart"
+            echo "Description: Restarts the remote PC."
+            echo "Usage: $0 restart"
+            echo ""
+            echo "Detailed Information:"
+            echo "  This command sends a restart signal to the remote PC using SSH."
+            echo "  It uses the shutdown command with the /r option."
+            echo ""
+            ;;
+        "connect")
+            echo "Command: connect"
+            echo "Description: Connect to the remote PC via SSH."
+            echo "Usage: $0 connect"
+            echo ""
+            echo "Detailed Information:"
+            echo "  This command opens an SSH connection to the remote PC."
+            echo "  It uses the ssh command with the configured user and hostname."
+            echo ""
+            ;;
         *)
             echo "Invalid command."
             show_help
@@ -80,7 +97,6 @@ show_command_help() {
     exit 1
 }
 
-# Function to show loading bar
 show_loading_bar() {
     local duration=$1
     local updates=100
@@ -98,7 +114,6 @@ show_loading_bar() {
     echo -ne "Progress: 100%\n"
 }
 
-# Function to wake up the PC
 wake_pc() {
     echo "Sending Wake-on-LAN packet to $MAC_ADDRESS at $ROUTER_PUBLIC_IP:$PORT..."
     wakeonlan -i $ROUTER_PUBLIC_IP -p $PORT $MAC_ADDRESS
@@ -106,17 +121,16 @@ wake_pc() {
     echo "Waiting for the PC to wake up..."
     show_loading_bar 60
     
-    if ping -c 1 -W 1 $PC_LOCAL_IP >/dev/null 2>&1; then
-        echo "The PC is now awake and reachable at $PC_LOCAL_IP."
+    if ping -c 1 -W 1 $ROUTER_PUBLIC_IP >/dev/null 2>&1; then
+        echo "The PC is now awake and reachable at $ROUTER_PUBLIC_IP."
     else
         echo "Failed to reach the PC. It may not have woken up correctly."
     fi
 }
 
-# Function to start Parsec on the remote machine
 start_parsec() {
-    echo "Starting Parsec on $ROUTER_PUBLIC_IP..."
-    ssh $SSH_USER@$ROUTER_PUBLIC_IP "C:\\Sysinternals\\psexec.exe -i 1 -d \"$APPLICATION\""
+    echo "Starting Parsec on $HOSTNAME..."
+    ssh $SSH_USER@$HOSTNAME "C:\\Sysinternals\\psexec.exe -i 1 -d \"$APPLICATION\""
     SSH_STATUS=$?
 
     if [ $SSH_STATUS -eq 0 ]; then
@@ -126,10 +140,22 @@ start_parsec() {
     fi
 }
 
+restart_pc() {
+    echo "Restarting the PC at $HOSTNAME..."
+    ssh -i $SSH_KEY $SSH_USER@$HOSTNAME "shutdown /r /t 0"
+    SSH_STATUS=$?
+
+    if [ $SSH_STATUS -eq 0 ]; then
+        echo "PC is restarting."
+    else
+        echo "Failed to restart the PC. Please check the connection and the command."
+    fi
+}
+
 # Function to shut down the remote PC
 shutdown_pc() {
-    echo "Shutting down the PC at $ROUTER_PUBLIC_IP..."
-    ssh -i $SSH_KEY $SSH_USER@$ROUTER_PUBLIC_IP "shutdown /s /t 0"
+    echo "Shutting down the PC at $HOSTNAME..."
+    ssh -i $SSH_KEY $SSH_USER@$HOSTNAME "shutdown /s /t 0"
     SSH_STATUS=$?
 
     if [ $SSH_STATUS -eq 0 ]; then
@@ -139,14 +165,15 @@ shutdown_pc() {
     fi
 }
 
-# Main execution starts here
+connect_ssh() {
+    echo "Connecting to the remote PC at $HOSTNAME..."
+    ssh -i $SSH_KEY $SSH_USER@$HOSTNAME
+}
 
-# Check if no action is provided or help option is used
 if [ -z "$ACTION" ] || [ "$ACTION" == "-h" ] || [ "$ACTION" == "--help" ]; then
     show_help
 fi
 
-# Handle specific command help
 if [ "$SUB_COMMAND" == "-h" ] || [ "$SUB_COMMAND" == "--help" ]; then
     case $ACTION in
         "turn_on")
@@ -161,6 +188,12 @@ if [ "$SUB_COMMAND" == "-h" ] || [ "$SUB_COMMAND" == "--help" ]; then
         "shutdown")
             show_command_help shutdown
             ;;
+        "restart")
+            show_command_help restart
+            ;;
+        "connect")
+            show_command_help connect
+            ;;
         *)
             echo "Invalid command."
             show_help
@@ -168,7 +201,6 @@ if [ "$SUB_COMMAND" == "-h" ] || [ "$SUB_COMMAND" == "--help" ]; then
     esac
 fi
 
-# Execute the selected action
 case $ACTION in
     "turn_on")
         wake_pc
@@ -182,6 +214,12 @@ case $ACTION in
         ;;
     "shutdown")
         shutdown_pc
+        ;;
+    "restart")
+        restart_pc
+        ;;
+    "connect")
+        connect_ssh
         ;;
     *)
         echo "Invalid command."
