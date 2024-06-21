@@ -1,6 +1,5 @@
 #!/usr/bin/env bats
 
-# Path to the script
 SCRIPT_PATH="/Users/taawake2/projects/personal/scripts/project/pc-remote-controller.sh"
 
 @test "Help output" {
@@ -56,33 +55,28 @@ SCRIPT_PATH="/Users/taawake2/projects/personal/scripts/project/pc-remote-control
   [ "$status" -eq 0 ]
   [[ "$output" =~ "Sending Wake-on-LAN packet to" ]]
   [[ "$output" =~ "Waiting for the PC to wake up..." ]]
-  # Add assertions based on actual output
 }
 
 @test "Start Parsec" {
   run $SCRIPT_PATH start_parsec
   [ "$status" -eq 0 ]
   [[ "$output" =~ "Starting Parsec on" ]]
-  # Add assertions based on actual output
 }
 
 @test "Shutdown PC" {
   run $SCRIPT_PATH shutdown
   [ "$status" -eq 0 ]
   [[ "$output" =~ "Shutting down the PC at" ]]
-  # Add assertions based on actual output
 }
 
 @test "Restart PC" {
   run $SCRIPT_PATH restart
   [ "$status" -eq 0 ]
   [[ "$output" =~ "Restarting the PC at" ]]
-  # Add assertions based on actual output
 }
 
 @test "Connect to PC via SSH" {
   run $SCRIPT_PATH connect
   [ "$status" -eq 0 ]
   [[ "$output" =~ "Connecting to the remote PC at" ]]
-  # Add assertions based on actual output
 }
