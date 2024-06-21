@@ -1,6 +1,6 @@
 #!/bin/bash
 
-source pc-secrets.sh
+source $SECRET_FILE_PATH
 
 ACTION=$1
 SUB_COMMAND=$2
