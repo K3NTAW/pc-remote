@@ -1,89 +1,139 @@
-# Remote PC Control Script
+## README
 
-This project contains a bash script that allows you to remotely control your Windows 11 PC from a MacBook. You can turn on your PC, start Parsec, and shut down your PC using SSH and Wake-on-LAN. This is useful for using your PC as a quick server or for gaming from another location.
+### Remote PC Control Script
 
-## Features
+This script allows you to control a remote PC by waking it up, starting the Parsec application, shutting it down, restarting it, and connecting to it via SSH.
 
-- **Turn on your PC remotely** using Wake-on-LAN.
-- **Start Parsec** on your PC to enable remote desktop and gaming.
-- **Shut down your PC remotely** using SSH.
+### Features
 
-## Prerequisites
+1. **Wake up the PC**: Use Wake-on-LAN to wake up the remote PC.
+2. **Start Parsec**: Start the Parsec application on the remote PC.
+3. **Both**: Perform both wake up and start Parsec.
+4. **Shutdown**: Shut down the remote PC.
+5. **Restart**: Restart the remote PC.
+6. **Connect**: Connect to the remote PC via SSH.
 
-- A MacBook with macOS.
-- A Windows 11 PC with SSH server installed and configured.
-- Wake-on-LAN enabled on your Windows 11 PC.
-- SSH keys set up for password-less login.
+### Prerequisites
 
-## Setup
+- **Wake-on-LAN Configuration**:
+  - Ensure that Wake-on-LAN is enabled in the BIOS of the remote PC.
+  - Configure your router to forward the necessary ports for Wake-on-LAN.
+  - Create a firewall rule to allow Wake-on-LAN packets through.
 
-### Step 1: Enable Wake-on-LAN on Your Windows 11 PC
+### Software Installation
 
-1. **Enable WoL in BIOS/UEFI**:
-   - Reboot your PC and enter the BIOS/UEFI settings (usually by pressing `Del`, `F2`, `F10`, or another key during startup).
-   - Find and enable the "Wake on LAN" or "Power on by PCI-E" setting.
-   - Save and exit the BIOS/UEFI settings.
+#### Linux
 
-2. **Enable WoL in Windows 11**:
-   - Open Device Manager.
-   - Expand the Network adapters section, right-click your network adapter, and select Properties.
-   - Go to the Power Management tab and check "Allow this device to wake the computer" and "Only allow a magic packet to wake the computer".
-   - Go to the Advanced tab, find "Wake on Magic Packet", and set it to Enabled.
+Install `wakeonlan` on the machine where this script will be run:
 
-### Step 2: Install and Configure an SSH Server on Your Windows 11 PC
+```sh
+sudo apt-get install wakeonlan
+```
 
-1. **Install OpenSSH Server**:
-   - Go to Settings > Apps > Optional Features > Add a feature.
-   - Find and install "OpenSSH Server".
+#### macOS
 
-2. **Start and Enable the SSH Server**:
-   - Open PowerShell as Administrator and run:
-     ```powershell
-     Start-Service sshd
-     Set-Service -StartupType Automatic -Name sshd
-     ```
-   - Allow SSH through the Windows Firewall:
-     ```powershell
-     New-NetFirewallRule -Name sshd -DisplayName 'OpenSSH Server (sshd)' -Enabled True -Direction Inbound -Protocol TCP -Action Allow -LocalPort 22
-     ```
+Install `wakeonlan` using Homebrew:
 
-### Step 3: Set Up Wake-on-LAN on Your MacBook
+```sh
+brew install wakeonlan
+```
 
-1. **Install Wake-on-LAN Tool**:
-   - Install `wakeonlan` using Homebrew:
-     ```sh
-     brew install wakeonlan
-     ```
+#### Windows
 
-## Usage
+For Windows, you can download the Wake-on-LAN tool from the internet or use the PowerShell script below to install it:
 
-To use the script, run it with the appropriate parameter:
+1. Download the Wake-on-LAN tool from [Depicus](https://www.depicus.com/wake-on-lan).
+2. Alternatively, use PowerShell:
 
-- To turn on the PC:
+```powershell
+Install-Module -Name WakeOnLAN -Scope CurrentUser
+```
+
+### Configuration File (`pc-secrets.sh`)
+
+Create a file named `pc-secrets.sh` in the same directory as your script and include the following variables:
+
+```sh
+# pc-secrets.sh
+
+# MAC address of the remote PC
+MAC_ADDRESS="00:11:22:33:44:55"
+
+# Router's public IP address
+ROUTER_PUBLIC_IP="203.0.113.1"
+
+# Port number for Wake-on-LAN
+PORT=9
+
+# SSH configuration
+SSH_USER="your_ssh_username"
+SSH_KEY="/path/to/your/ssh/key"
+HOSTNAME="remote.pc.hostname.or.ip"
+
+# Parsec application path on the remote PC
+APPLICATION="C:\\Path\\To\\Parsec.exe"
+```
+
+### Usage
+
+```sh
+./script.sh {turn_on|start_parsec|both|shutdown|restart|connect} [-h|--help]
+```
+
+#### Commands
+
+- **turn_on**: Wake up the PC and check connectivity.
   ```sh
-  ./remote_start.sh turn_on
+  ./script.sh turn_on
+  ```
+- **start_parsec**: Start Parsec application on the remote machine.
+  ```sh
+  ./script.sh start_parsec
+  ```
+- **both**: Perform both turn_on and start_parsec.
+  ```sh
+  ./script.sh both
+  ```
+- **shutdown**: Shutdown the remote PC.
+  ```sh
+  ./script.sh shutdown
+  ```
+- **restart**: Restart the remote PC.
+  ```sh
+  ./script.sh restart
+  ```
+- **connect**: Connect to the remote PC via SSH.
+  ```sh
+  ./script.sh connect
   ```
 
-- To start Parsec:
-  ```sh
-  ./remote_start.sh start_parsec
-  ```
+#### Options
 
-- To both turn on the PC and start Parsec:
-  ```sh
-  ./remote_start.sh both
-  ```
+- **-h, --help**: Show help message and exit.
 
-- To shut down the PC:
-  ```sh
-  ./remote_start.sh shutdown
-  ```
+### Detailed Command Help
 
-## Security
+For detailed command help, use:
 
-- **File Permissions**: Ensure that both `remote_config.sh` and `remote_start.sh` have appropriate file permissions to prevent unauthorized access.
-- **Environment Variables**: Alternatively, you can export these variables in your shell profile (e.g., `.bash_profile` or `.zshrc`), but this might expose them to any process running in your user session.
+```sh
+./script.sh <command> -h
+```
 
-## Purpose
+### Example
 
-This setup allows you to use your Windows PC as a quick server or for gaming from another location, providing flexibility and convenience. By turning on your PC, starting necessary applications, and shutting it down remotely, you can manage your PC efficiently without being physically present.
+To wake up the remote PC and start Parsec:
+
+```sh
+./script.sh both
+```
+
+### Troubleshooting
+
+- Ensure Wake-on-LAN is properly configured in the BIOS of the remote PC.
+- Verify port forwarding and firewall rules for Wake-on-LAN.
+- Check SSH connectivity to the remote PC using the provided SSH key and user.
+
+### Notes
+
+- This script assumes you have SSH access to the remote PC and the `psexec.exe` tool installed for starting applications on Windows.
+- Modify the paths and user details in `pc-secrets.sh` according to your setup.

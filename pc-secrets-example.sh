@@ -1,3 +1,4 @@
+#delete the -example from the name to use this file
 export MAC_ADDRESS=""
 #if you have dynamic dns
 export HOSTNAME=""
