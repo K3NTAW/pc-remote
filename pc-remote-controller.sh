@@ -6,7 +6,7 @@ ACTION=$1
 SUB_COMMAND=$2
 
 show_help() {
-    echo "Usage: $0 {turn_on|start_parsec|both|shutdown|restart|connect} [-h|--help]"
+    echo "PC remote controller help"
     echo "  turn_on       : Wake up the PC and check connectivity."
     echo "  start_parsec  : Start Parsec application on the remote machine."
     echo "  both          : Perform both turn_on and start_parsec."
@@ -37,6 +37,7 @@ show_command_help() {
             echo "  This command sends a Wake-on-LAN packet to the PC's MAC address to wake it up."
             echo "  It then waits for the PC to become reachable by pinging its local IP address."
             echo ""
+            exit 0
             ;;
         "start_parsec")
             echo "Command: start_parsec"
@@ -47,6 +48,7 @@ show_command_help() {
             echo "  This command initiates the Parsec application on the remote PC using SSH."
             echo "  It uses psexec to start the application in the background."
             echo ""
+            exit 0
             ;;
         "both")
             echo "Command: both"
@@ -57,6 +59,7 @@ show_command_help() {
             echo "  This command combines the functionalities of turn_on and start_parsec."
             echo "  It first wakes up the PC and then starts the Parsec application on it."
             echo ""
+            exit 0
             ;;
         "shutdown")
             echo "Command: shutdown"
@@ -67,6 +70,7 @@ show_command_help() {
             echo "  This command sends a shutdown signal to the remote PC using SSH."
             echo "  It uses the shutdown command with a timeout of 0 seconds."
             echo ""
+            exit 0
             ;;
         "restart")
             echo "Command: restart"
@@ -77,6 +81,7 @@ show_command_help() {
             echo "  This command sends a restart signal to the remote PC using SSH."
             echo "  It uses the shutdown command with the /r option."
             echo ""
+            exit 0
             ;;
         "connect")
             echo "Command: connect"
@@ -87,6 +92,7 @@ show_command_help() {
             echo "  This command opens an SSH connection to the remote PC."
             echo "  It uses the ssh command with the configured user and hostname."
             echo ""
+            exit 0
             ;;
         *)
             echo "Invalid command."
