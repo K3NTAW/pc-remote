@@ -1,6 +1,6 @@
 #!/bin/bash
 
-source $SECRET_FILE_PATH
+source /Users/taawake2/projects/personal/scripts/project/pc-secrets.sh
 
 ACTION=$1
 SUB_COMMAND=$2
