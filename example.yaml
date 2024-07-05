@@ -1,0 +1,10 @@
+# nginx-webserver.yaml
+
+container_name: nginx_webserver
+image: nginx:latest
+ports:
+  - "8080:80"
+volumes:
+  - "./html:/usr/share/nginx/html"
+environment:
+  - "TZ=America/New_York"

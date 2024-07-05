@@ -1,133 +1,147 @@
 ## README
 
-### Remote PC Control Script
+### Remote PC and Docker Container Management Script
 
-This script allows you to control a remote PC by waking it up, starting the Parsec application, shutting it down, restarting it, and connecting to it via SSH.
+This script provides functionality to control a remote PC and manage Docker containers on it via SSH. It supports waking up the PC, starting applications like Parsec, shutting down or restarting the PC, and managing Docker containers using YAML configuration files.
 
 ### Features
 
-1. **Wake up the PC**: Use Wake-on-LAN to wake up the remote PC.
-2. **Start Parsec**: Start the Parsec application on the remote PC.
-3. **Both**: Perform both wake up and start Parsec.
-4. **Shutdown**: Shut down the remote PC.
-5. **Restart**: Restart the remote PC.
-6. **Connect**: Connect to the remote PC via SSH.
+1. **Remote PC Control**:
+   - Wake up the PC using Wake-on-LAN.
+   - Start the Parsec application on the remote PC.
+   - Shut down or restart the remote PC.
+   - Connect to the remote PC via SSH.
+
+2. **Docker Container Management**:
+   - Create Docker containers based on YAML configuration files.
+   - Start, stop, and delete Docker containers.
+   - List all running and existing Docker containers.
 
 ### Prerequisites
 
-- **Wake-on-LAN Configuration**:
-  - Ensure that Wake-on-LAN is enabled in the BIOS of the remote PC.
-  - Configure your router to forward the necessary ports for Wake-on-LAN.
-  - Create a firewall rule to allow Wake-on-LAN packets through.
+1. **Dependencies**:
+   - `wakeonlan`: For waking up the PC remotely.
+   - `ssh`: For connecting to the remote PC.
+   - Docker: Installed and configured on the remote machine.
 
-### Software Installation
+2. **Configuration**:
+   - Ensure Wake-on-LAN is enabled in the BIOS of the remote PC.
+   - Configure router settings to forward Wake-on-LAN packets.
+   - Create an SSH key and configure SSH access to the remote PC.
 
-#### Linux
+### Installation
 
-Install `wakeonlan` on the machine where this script will be run:
+1. **Linux**:
+   - Install `wakeonlan`:
+     ```bash
+     sudo apt-get install wakeonlan
+     ```
+   - Ensure Docker is installed and configured on the remote machine.
 
-```sh
-sudo apt-get install wakeonlan
-```
+2. **macOS**:
+   - Install `wakeonlan` using Homebrew:
+     ```bash
+     brew install wakeonlan
+     ```
+   - Docker installation should follow standard macOS procedures.
 
-#### macOS
-
-Install `wakeonlan` using Homebrew:
-
-```sh
-brew install wakeonlan
-```
-
-#### Windows
-
-For Windows, you can download the Wake-on-LAN tool from the internet or use the PowerShell script below to install it:
-
-1. Download the Wake-on-LAN tool from [Depicus](https://www.depicus.com/wake-on-lan).
-2. Alternatively, use PowerShell:
-
-```powershell
-Install-Module -Name WakeOnLAN -Scope CurrentUser
-```
+3. **Windows**:
+   - Download and install a Wake-on-LAN tool suitable for Windows.
+   - Ensure Docker Desktop is installed and configured on the remote Windows PC.
 
 ### Configuration File (`pc-secrets.sh`)
 
-Create a file named `pc-secrets.sh` in the same directory as your script and include the following variables:
+Create a `pc-secrets.sh` file in the script directory with the following variables:
 
-```sh
+```bash
 # pc-secrets.sh
 
-# MAC address of the remote PC
-MAC_ADDRESS="00:11:22:33:44:55"
+# Remote PC details
+MAC_ADDRESS="00:11:22:33:44:55"   # MAC address for Wake-on-LAN
+ROUTER_PUBLIC_IP="203.0.113.1"    # Router's public IP for Wake-on-LAN
+PORT=9                            # Wake-on-LAN port
+SSH_USER="your_ssh_username"      # SSH username for remote PC
+SSH_KEY="/path/to/your/ssh/key"   # Path to SSH private key
+HOSTNAME="remote.pc.hostname.or.ip"   # Remote PC hostname or IP
 
-# Router's public IP address
-ROUTER_PUBLIC_IP="203.0.113.1"
-
-# Port number for Wake-on-LAN
-PORT=9
-
-# SSH configuration
-SSH_USER="your_ssh_username"
-SSH_KEY="/path/to/your/ssh/key"
-HOSTNAME="remote.pc.hostname.or.ip"
-
-# Parsec application path on the remote PC
+# Parsec application path (for Windows)
 APPLICATION="C:\\Path\\To\\Parsec.exe"
 ```
 
-#### Commands
+### Usage
 
-- **turn_on**: Wake up the PC and check connectivity.
-  ```sh
+Run the script with the following commands:
+
+- **Wake up the PC**:
+  ```bash
   ./pc-remote-controller.sh turn_on
   ```
-- **start_parsec**: Start Parsec application on the remote machine.
-  ```sh
+
+- **Start Parsec application**:
+  ```bash
   ./pc-remote-controller.sh start_parsec
   ```
-- **both**: Perform both turn_on and start_parsec.
-  ```sh
+
+- **Both (Wake up and start Parsec)**:
+  ```bash
   ./pc-remote-controller.sh both
   ```
-- **shutdown**: Shutdown the remote PC.
-  ```sh
+
+- **Shutdown the PC**:
+  ```bash
   ./pc-remote-controller.sh shutdown
   ```
-- **restart**: Restart the remote PC.
-  ```sh
+
+- **Restart the PC**:
+  ```bash
   ./pc-remote-controller.sh restart
   ```
-- **connect**: Connect to the remote PC via SSH.
-  ```sh
+
+- **Connect to the PC via SSH**:
+  ```bash
   ./pc-remote-controller.sh connect
   ```
 
-#### Options
+- **Create a Docker container** (replace `<yaml_file>` with your YAML file):
+  ```bash
+  ./pc-remote-controller.sh create_container <yaml_file>
+  ```
 
-- **-h, --help**: Show help message and exit.
+- **Start a Docker container**:
+  ```bash
+  ./pc-remote-controller.sh start_container <container_name>
+  ```
+
+- **Stop a Docker container**:
+  ```bash
+  ./pc-remote-controller.sh stop_container <container_name>
+  ```
+
+- **Delete a Docker container**:
+  ```bash
+  ./pc-remote-controller.sh delete_container <container_name>
+  ```
+
+- **List all Docker containers**:
+  ```bash
+  ./pc-remote-controller.sh list_containers
+  ```
 
 ### Detailed Command Help
 
-For detailed command help, use:
-
-```sh
+For detailed command information, use:
+```bash
 ./pc-remote-controller.sh <command> -h
-```
-
-### Example
-
-To wake up the remote PC and start Parsec:
-
-```sh
-./pc-remote-controller.sh both
 ```
 
 ### Troubleshooting
 
-- Ensure Wake-on-LAN is properly configured in the BIOS of the remote PC.
-- Verify port forwarding and firewall rules for Wake-on-LAN.
-- Check SSH connectivity to the remote PC using the provided SSH key and user.
+- Ensure Wake-on-LAN is correctly configured in the BIOS and router settings.
+- Verify SSH connectivity and credentials (`pc-secrets.sh`).
+- Check Docker installation and configuration on the remote machine.
+- Review script logs and error messages for specific issues.
 
 ### Notes
 
-- This script assumes you have SSH access to the remote PC and the `psexec.exe` tool installed for starting applications on Windows.
-- Modify the paths and user details in `pc-secrets.sh` according to your setup.
+- Customize paths and configurations in `pc-secrets.sh` according to your setup.
+- Ensure Docker containers are configured properly in YAML files for container management commands.

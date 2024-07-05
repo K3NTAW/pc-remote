@@ -4,6 +4,9 @@ source /Users/taawake2/projects/personal/scripts/project/pc-secrets.sh
 
 ACTION=$1
 SUB_COMMAND=$2
+YAML_FILE=$2
+
+REMOTE_SSH="ssh -i $SSH_KEY $SSH_USER@$HOSTNAME"
 
 show_help() {
     echo "PC remote controller help"
@@ -13,15 +16,84 @@ show_help() {
     echo "  shutdown      : Shutdown the remote PC."
     echo "  restart       : Restart the remote PC."
     echo "  connect       : Connect to the remote PC via SSH."
+    echo "  create_container <yaml_file> : Create a Docker container based on the YAML configuration."
+    echo "  start_container <container_name> : Start the specified Docker container."
+    echo "  stop_container <container_name> : Stop the specified Docker container."
+    echo "  delete_container <container_name> : Delete the specified Docker container."
+    echo "  list_containers : List all running and existing Docker containers."
     echo ""
     echo "For specific command help use:"
-    echo "  $0 turn_on -h or --help"
-    echo "  $0 start_parsec -h or --help"
-    echo "  $0 both -h or --help"
-    echo "  $0 shutdown -h or --help"
-    echo "  $0 restart -h or --help"
-    echo "  $0 connect -h or --help"
+    echo "  $0 <command> -h or --help"
     exit 1
+}
+
+create_container() {
+    local yaml_file=$1
+
+    echo "Creating Docker container using YAML file: $yaml_file"  # Log the YAML file name
+
+    if [ ! -f "$yaml_file" ]; then
+        echo "YAML file not found at path: $yaml_file"
+        exit 1
+    fi
+
+    container_name=$(yq e '.container_name' "$yaml_file")
+    image=$(yq e '.image' "$yaml_file")
+    ports=$(yq e '.ports[]' "$yaml_file" | awk '{print "-p "$1}')
+    volumes=$(yq e '.volumes[]' "$yaml_file" | awk '{print "-v "$1}')
+    env_vars=$(yq e '.environment[]' "$yaml_file" | awk '{print "-e "$1}')
+
+    echo "Creating container with name: $container_name, image: $image, ports: $ports, volumes: $volumes, env_vars: $env_vars"
+
+    $REMOTE_SSH "docker create --name \"$container_name\" $ports $volumes $env_vars \"$image\""
+    if [ $? -eq 0 ]; then
+        echo "Container '$container_name' created successfully."
+    else
+        echo "Failed to create container '$container_name'."
+    fi
+}
+
+
+# Function to start a Docker container on the remote machine
+start_container() {
+    local container_name=$1
+    $REMOTE_SSH "docker start \"$container_name\""
+    if [ $? -eq 0 ]; then
+        echo "Container '$container_name' started successfully."
+    else
+        echo "Failed to start container '$container_name'."
+    fi
+}
+
+# Function to stop a Docker container on the remote machine
+stop_container() {
+    local container_name=$1
+    $REMOTE_SSH "docker stop \"$container_name\""
+    if [ $? -eq 0 ]; then
+        echo "Container '$container_name' stopped successfully."
+    else
+        echo "Failed to stop container '$container_name'."
+    fi
+}
+
+# Function to delete a Docker container on the remote machine
+delete_container() {
+    local container_name=$1
+    $REMOTE_SSH "docker rm \"$container_name\""
+    if [ $? -eq 0 ]; then
+        echo "Container '$container_name' deleted successfully."
+    else
+        echo "Failed to delete container '$container_name'."
+    fi
+}
+
+# Function to list Docker containers on the remote machine
+list_containers() {
+    echo "Running containers on remote machine:"
+    $REMOTE_SSH "docker ps"
+    echo ""
+    echo "All containers on remote machine:"
+    $REMOTE_SSH "docker ps -a"
 }
 
 show_command_help() {
@@ -94,6 +166,56 @@ show_command_help() {
             echo ""
             exit 0
             ;;
+        "create_container")
+            echo "Command: create_container"
+            echo "Description: Creates a Docker container based on the YAML configuration."
+            echo "Usage: $0 create_container <yaml_file>"
+            echo ""
+            echo "Detailed Information:"
+            echo "  This command reads the YAML file and creates a Docker container based on its contents."
+            echo ""
+            exit 0
+            ;;
+        "start_container")
+            echo "Command: start_container"
+            echo "Description: Starts the specified Docker container."
+            echo "Usage: $0 start_container <container_name>"
+            echo ""
+            echo "Detailed Information:"
+            echo "  This command starts a Docker container that has already been created."
+            echo ""
+            exit 0
+            ;;
+        "stop_container")
+            echo "Command: stop_container"
+            echo "Description: Stops the specified Docker container."
+            echo "Usage: $0 stop_container <container_name>"
+            echo ""
+            echo "Detailed Information:"
+            echo "  This command stops a running Docker container."
+            echo ""
+            exit 0
+            ;;
+        "delete_container")
+            echo "Command: delete_container"
+            echo "Description: Deletes the specified Docker container."
+            echo "Usage: $0 delete_container <container_name>"
+            echo ""
+            echo "Detailed Information:"
+            echo "  This command deletes a Docker container."
+            echo ""
+            exit 0
+            ;;
+        "list_containers")
+            echo "Command: list_containers"
+            echo "Description: Lists all running and existing Docker containers."
+            echo "Usage: $0 list_containers"
+            echo ""
+            echo "Detailed Information:"
+            echo "  This command lists all Docker containers, showing which ones are running and which ones exist but are not running."
+            echo ""
+            exit 0
+            ;;
         *)
             echo "Invalid command."
             show_help
@@ -158,7 +280,6 @@ restart_pc() {
     fi
 }
 
-# Function to shut down the remote PC
 shutdown_pc() {
     echo "Shutting down the PC at $HOSTNAME..."
     ssh -i $SSH_KEY $SSH_USER@$HOSTNAME "shutdown /s /t 0"
@@ -181,30 +302,7 @@ if [ -z "$ACTION" ] || [ "$ACTION" == "-h" ] || [ "$ACTION" == "--help" ]; then
 fi
 
 if [ "$SUB_COMMAND" == "-h" ] || [ "$SUB_COMMAND" == "--help" ]; then
-    case $ACTION in
-        "turn_on")
-            show_command_help turn_on
-            ;;
-        "start_parsec")
-            show_command_help start_parsec
-            ;;
-        "both")
-            show_command_help both
-            ;;
-        "shutdown")
-            show_command_help shutdown
-            ;;
-        "restart")
-            show_command_help restart
-            ;;
-        "connect")
-            show_command_help connect
-            ;;
-        *)
-            echo "Invalid command."
-            show_help
-            ;;
-    esac
+    show_command_help $ACTION
 fi
 
 case $ACTION in
@@ -226,6 +324,21 @@ case $ACTION in
         ;;
     "connect")
         connect_ssh
+        ;;
+    "create_container")
+        create_container $YAML_FILE
+        ;;
+    "start_container")
+        start_container $SUB_COMMAND
+        ;;
+    "stop_container")
+        stop_container $SUB_COMMAND
+        ;;
+    "delete_container")
+        delete_container $SUB_COMMAND
+        ;;
+    "list_containers")
+        list_containers
         ;;
     *)
         echo "Invalid command."
