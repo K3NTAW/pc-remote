@@ -89,9 +89,6 @@ delete_container() {
 
 # Function to list Docker containers on the remote machine
 list_containers() {
-    echo "Running containers on remote machine:"
-    $REMOTE_SSH "docker ps"
-    echo ""
     echo "All containers on remote machine:"
     $REMOTE_SSH "docker ps -a"
 }
